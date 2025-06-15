@@ -1,0 +1,52 @@
+name: Update
+
+on:
+  schedule:
+    - cron: "0 11 * * *"
+  workflow_dispatch:
+
+jobs:
+  update:
+    name: RemotePlayWhatever Update
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: DeterminateSystems/nix-installer-action@v17
+        with:
+          source-url: https://install.lix.systems/lix/lix-installer-x86_64-linux
+          diagnostic-endpoint: ""
+
+      - name: Configure git
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email 'github-actions[bot]@users.noreply.github.com'
+
+      - run: |
+          mkdir -p ~/.config/nixpkgs
+          echo "{ allowUnfree = true; }" > ~/.config/nixpkgs/config.nix
+
+      - run: nix run github:Mic92/nix-update -- RemotePlayWhatever --url 'https://github.com/m4dEngi/RemotePlayWhatever' --flake --commit --version-regex '(.*-.*)' --version=unstable
+
+      - id: create-pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: update_RemotePlayWhatever
+          delete-branch: true
+          committer: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          author: "github-actions[bot] <github-actions[bot]@users.noreply.github.com>"
+          commit-message: "pkgs: update RemotePlayWhatever"
+          title: "pkgs: update RemotePlayWhatever"
+          labels: "dependencies"
+          body: |
+            Automated bump of RemotePlayWhatever
+
+      - uses: benc-uk/workflow-dispatch@v1
+        if: ${{ contains(fromJSON('["created", "updated"]'), steps.create-pr.outputs.pull-request-operation) }}
+        with:
+          workflow: build.yml
+          ref: refs/heads/update_RemotePlayWhatever

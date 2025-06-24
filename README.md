@@ -1,5 +1,11 @@
 # RemotePlayWhatever
 
+## Deprecation
+
+DATE: `2025-06-24`
+
+This repo is being archived, and is now managed under [just-one-more-repo](https://github.com/ProverbialPennance/just-one-more-repo)
+
 ## Installation
 
 For a [flakes enabled system](https://nixos.wiki/wiki/flakes#Enable_flakes_permanently_in_NixOS), the following additions to a `flake.nix` in your system's configuration directory will add an overlay replacing the package in nixpkgs with this one.
